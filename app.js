@@ -9,6 +9,7 @@ const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
+const { create } = require("domain");
 
 const teamMembers = [];
 const idArray = [];
@@ -16,7 +17,7 @@ const idArray = [];
 // and to create objects for each team member (using the correct classes as blueprints!)
 // I could create an array for general(common) questions and role specific questions, then I could concatenate the arrays of questions inside the function for the
 // respective role. Then pass that new array into inquirer and work from there.
-function appMenu() {
+
   /**
    * @todo ID is a common question between engineers and interns. If I ask for their ID in the createTeam's inquirer, I can pull that data into other functions for later
    */
@@ -29,6 +30,7 @@ function appMenu() {
           name: "addMember",
           choices: ["Engineer", "Intern", "I don't need to add a member"]
         },
+        // move this question 
         {
           type: "input",
           message: "What is your ID number?",
@@ -37,7 +39,7 @@ function appMenu() {
       ]).then(userChoice => {
     switch(userChoice.addMember) {
           case "Engineer":
-            addEngineer();
+            addEngineer(userChoice.addID);
             break;
           case "Intern":
             addIntern();
@@ -49,15 +51,9 @@ function appMenu() {
   }
 
   // need different prompts for engineer
-  function addEngineer() {
+  function addEngineer(id) {
     inquirer
     .prompt([
-      {
-        type: "list",
-        message: "Which type of team member would you like to add?",
-        name: "addMember",
-        choices: ["Engineer", "Intern", "I don't need to add a member"]
-      },
       {
         type: "input",
         message: "What is your github?",
@@ -65,24 +61,20 @@ function appMenu() {
       },
       {
         type: "input",
-        message: "What is your ID?",
-        name: "addID"
-      },
-      {
-        type: "input",
         message: "What is the engineer's name?",
-        name: "name"
+        name: "addName"
       },
       {
         type: "input",
         message: "What is the email?",
-        name: "email"
+        name: "addEmail"
       }
     ]).then(answers => {
-        const engineer = new Engineer(answers.name); // answers. whatever I name the questions, should be 4       
+        const engineer = new Engineer(answers.addName, id, answers.addEmail, answers.addGitHub); // answers. whatever I name the questions, should be 4       
         teamMembers.push(engineer);
-        idArray.push(answers.addID) // answers.whatever I refer to id as
-        createTeam();
+        idArray.push(id) // answers.whatever I refer to id as
+      console.log(engineer);
+      createTeam();
       });
   }
   
@@ -92,9 +84,10 @@ function appMenu() {
     }
     fs.writeFileSync(outputPath,render(teamMembers),"utf-8");
   }
-  createManager();
-}
-appMenu();
+
+createTeam();
+//  createManager();
+
 // inputting of intern, engineer, create manager function
 
 

@@ -19,7 +19,7 @@ const idArray = [];
 // respective role. Then pass that new array into inquirer and work from there.
 
   /**
-   * @todo ID is a common question between engineers and interns. If I ask for their ID in the createTeam's inquirer, I can pull that data into other functions for later
+   * @todo if choice is not engineer, intern, or manager, call buildTeam();
    */
   function createTeam() {
     inquirer
@@ -28,21 +28,24 @@ const idArray = [];
           type: "list",
           message: "Which type of team member would you like to add?",
           name: "addMember",
-          choices: ["Engineer", "Intern", "I don't need to add a member"]
-        },
-        // move this question 
-        {
-          type: "input",
-          message: "What is your ID number?",
-          name: "addID"
+          choices: ["Engineer", "Intern", "Manager", "I don't need to add a member"],
+          validate: answer => {
+           console.log(answer);
+            if (answer === "I don't need to add a member") {
+              buildTeam();
+            }
+          }
         }
       ]).then(userChoice => {
     switch(userChoice.addMember) {
           case "Engineer":
-            addEngineer(userChoice.addID);
+            addEngineer();
             break;
           case "Intern":
             addIntern();
+            break;
+          case "Manager":
+            addManager();
             break;
           default:
             buildTeam();        
@@ -51,7 +54,7 @@ const idArray = [];
   }
 
   // need different prompts for engineer
-  function addEngineer(id) {
+  function addEngineer() {
     inquirer
     .prompt([
       {
@@ -61,21 +64,108 @@ const idArray = [];
       },
       {
         type: "input",
-        message: "What is the engineer's name?",
-        name: "addName"
+        message: "What is the user's name?",
+        name: "addName",
+        validate: answer => {
+          if (answer !== "") {
+            return true; 
+          }
+          return "Enter a valid name";
+        }
       },
       {
         type: "input",
-        message: "What is the email?",
-        name: "addEmail"
+        message: "What is your ID number?",
+        name: "addID",
+        validate: answer => {
+          const valid = answer.match(/^[1-9]\d*$/);
+          if (valid ) {
+            if (idArray.includes(answer)) {
+              return "This ID is taken already, enter a different ID.";
+            }
+            else {
+              return true;
+            }
+          }
+          return "Please enter positive number greater than 0."
+        }
+      },
+      {
+        type: "input",
+        message: "What is the employee's email?",
+        name: "addEmail",
+        validate: answer => {
+          const valid = answer.match(/\S+@\S+\.\S+/);
+          if (valid) {
+            return true;
+          }
+          return "Please enter a valid email."
+        }
       }
-    ]).then(answers => {
-        const engineer = new Engineer(answers.addName, id, answers.addEmail, answers.addGitHub); // answers. whatever I name the questions, should be 4       
+    ]).then(userChoice => {
+        const engineer = new Engineer(userChoice.addName, userChoice.addID, userChoice.addEmail, userChoice.addGitHub);        
         teamMembers.push(engineer);
-        idArray.push(id) // answers.whatever I refer to id as
+        idArray.push(userChoice.addID) 
       console.log(engineer);
       createTeam();
       });
+  }
+
+  function addIntern() {
+    inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What school does the intern currently attend?",
+        name: "addSchool"
+      },
+      {
+        type: "input",
+        message: "What is the user's name?",
+        name: "addName",
+        validate: answer => {
+          if (answer !== "") {
+            return true; 
+          }
+          return "Enter a valid name";
+        }
+      },
+      {
+        type: "input",
+        message: "What is your ID number?",
+        name: "addID",
+        validate: answer => {
+          const valid = answer.match(/^[1-9]\d*$/);
+          if (valid ) {
+            if (idArray.includes(answer)) {
+              return "This ID is taken already, enter a different ID.";
+            }
+            else {
+              return true;
+            }
+          }
+          return "Please enter positive number greater than 0."
+        }
+      },
+      {
+        type: "input",
+        message: "What is the employee's email?",
+        name: "addEmail",
+        validate: answer => {
+          const valid = answer.match(/\S+@\S+\.\S+/);
+          if (valid) {
+            return true;
+          }
+          return "Please enter a valid email."
+        }
+      }
+    ]).then(userChoice => {
+      const intern = new Intern(userChoice.addName, userChoice.addID, userChoice.addEmail, userChoice.addSchool);        
+      teamMembers.push(intern);
+      idArray.push(userChoice.addID) 
+    console.log(intern);
+    createTeam();
+    });
   }
   
   function buildTeam() {
@@ -85,7 +175,67 @@ const idArray = [];
     fs.writeFileSync(outputPath,render(teamMembers),"utf-8");
   }
 
+  function addManager() {
+    inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the manager's office number?",
+        name: "addOfficeNum"
+      },
+      {
+        type: "input",
+        message: "What is the user's name?",
+        name: "addName",
+        validate: answer => {
+          if (answer !== "") {
+            return true; 
+          }
+          return "Enter a valid name";
+        }
+      },
+      {
+        type: "input",
+        message: "What is your ID number?",
+        name: "addID",
+        validate: answer => {
+          const valid = answer.match(/^[1-9]\d*$/);
+          if (valid ) {
+            if (idArray.includes(answer)) {
+              return "This ID is taken already, enter a different ID.";
+            }
+            else {
+              return true;
+            }
+          }
+          return "Please enter positive number greater than 0."
+        }
+      },
+      {
+        type: "input",
+        message: "What is the employee's email?",
+        name: "addEmail",
+        validate: answer => {
+          const valid = answer.match(/\S+@\S+\.\S+/);
+          if (valid) {
+            return true;
+          }
+          return "Please enter a valid email."
+        }
+      }
+    ]).then(userChoice => {
+      const manager = new Manager(userChoice.addName, userChoice.addID, userChoice.addEmail, userChoice.addOfficeNum);       
+      teamMembers.push(manager);
+      idArray.push(userChoice.addID) 
+    console.log(manager);
+    createTeam();
+    });
+  }
+
 createTeam();
+
+// copy paste the questions back into their respective functions
+
 //  createManager();
 
 // inputting of intern, engineer, create manager function
